@@ -1,0 +1,48 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: awx
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: awx-operator
+      version: "2.5.2"
+      sourceRef:
+        kind: HelmRepository
+        name: awx-operator  #Change it if needed
+        namespace: flux-system #Change it if needed 
+  interval: 10m
+  install: 
+    remediation:
+      retries: -1
+  upgrade:
+    remediation:
+      retries: -1   
+  values:
+    AWX:
+      enabled: true
+      name: awx-demo
+      spec:
+        service_type: NodePort
+        admin_user: admin
+        nodeport_port: 
+        ingress_type: ingress
+        hostname: awx-demo.example.com
+        ingress_annotations: |
+          kubernetes.io/ingress.class: "alb"
+          alb.ingress.kubernetes.io/scheme: "internet-facing"
+          alb.ingress.kubernetes.io/target-type: "ip" 
+        ingress_path: / 
+        service_account_annotations: |
+          eks.amazonaws.com/role-arn: arn:aws:iam::155386405988:role/aws-loadbalancer-controller
+      postgres:
+        enabled: true
+        host: 
+        port: 5432
+        dbName: postgres
+        username: postgres
+        password: 
+
+
